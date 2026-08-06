@@ -63,3 +63,21 @@ def test_petr_has_no_orders(db):
     """)
     result = cursor.fetchone()
     assert result[1] is None
+    
+
+@pytest.mark.parametrize("user_name, expected_count", [
+    ("Иван", 2),
+    ("Мария", 1),
+    ("Петр", 0),
+])
+def test_user_order_count(db, user_name, expected_count):
+    cursor = db.cursor()
+    cursor.execute("""
+        SELECT COUNT(orders.id) 
+        FROM users 
+        LEFT JOIN orders ON users.id = orders.user_id
+        WHERE users.name = ?
+    """, (user_name,))
+    
+    actual_count = cursor.fetchone()[0]
+    assert actual_count == expected_count, f"У {user_name} ожидали {expected_count} заказов, а получили {actual_count}"
