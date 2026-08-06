@@ -1,9 +1,12 @@
 import sqlite3
 import os
+import pytest
+
 DB_NAME = 'my_database.db'
 
-def setup_database():
-    """Создаём чистую базу с таблицами и данными"""
+@pytest.fixture
+def db():
+    """Фикстура: создаёт чистую базу перед тестом и закрывает после"""
     if os.path.exists(DB_NAME):
         os.remove(DB_NAME)
     
@@ -22,30 +25,25 @@ def setup_database():
     cursor.execute("INSERT INTO orders (user_id, product, price) VALUES (2, 'мышь', 1500)")
     
     conn.commit()
+    
+    yield conn  # ← отдаём соединение тесту
+    
     conn.close()
+    if os.path.exists(DB_NAME):
+        os.remove(DB_NAME)
 
-def test_user_orders_count():
-    """Проверяем: у Ивана 2 заказа в базе"""
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
+def test_user_orders_count(db):
+    cursor = db.cursor()
     cursor.execute("""
         SELECT users.name, orders.product 
         FROM users 
         INNER JOIN orders ON users.id = orders.user_id
     """)
     results = cursor.fetchall()
-    
-    assert len(results) == 3, f"Ожидали 3 строки, а получили {len(results)}"
-    print("✓ Тест 1 пройден: количество заказов верное")
-    
-    conn.close()
+    assert len(results) == 3
 
-
-def test_second_order_is_keyboard():
-    """Проверяем: второй заказ — клавиатура Ивана"""
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
+def test_second_order_is_keyboard(db):
+    cursor = db.cursor()
     cursor.execute("""
         SELECT users.name, orders.product 
         FROM users 
@@ -53,17 +51,10 @@ def test_second_order_is_keyboard():
         ORDER BY orders.id
     """)
     results = cursor.fetchall()
-    
     assert results[1] == ('Иван', 'клавиатура')
-    print("✓ Тест 2 пройден: второй заказ — клавиатура")
-    
-    conn.close()
 
-    
-def test_petr_has_no_orders():
-    conn = sqlite3.connect(DB_NAME)
-    cursor = conn.cursor()
-    
+def test_petr_has_no_orders(db):
+    cursor = db.cursor()
     cursor.execute("""
         SELECT users.name, orders.product 
         FROM users 
@@ -71,20 +62,4 @@ def test_petr_has_no_orders():
         WHERE users.name = 'Петр'
     """)
     result = cursor.fetchone()
-    
-    assert result[1] is None, f"Ожидали None, а получили {result[1]}"
-    print("✓ Тест 3 пройден: у Петра нет заказов")
-    
-    conn.close()
-
-# === ТОЧКА ВХОДА ===
-if __name__ == "__main__":
-    setup_database()
-    test_user_orders_count()
-    test_second_order_is_keyboard()
-    test_petr_has_no_orders()
-    print("\nВсе тесты пройдены!")
-
-
-
-
+    assert result[1] is None
