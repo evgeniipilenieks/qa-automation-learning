@@ -23,9 +23,3 @@
 | `app.py` | Тестовый Flask-сервер (свой API) |
 | `test_flask_api.py` | End-to-end тест: API → База → Проверка |
 | `test_selenium.py` | UI-тесты: поиск элементов, клики, проверка заголовков |
-
-## Как запустить
-
-### 1. Установка зависимостей
-```bash
-pip install pytest requests selenium flask
