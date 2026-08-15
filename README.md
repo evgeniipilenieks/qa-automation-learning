@@ -2,9 +2,6 @@
 
 # QA Automation Learning
 
-
-# QA Automation Learning
-
 Проект для изучения автоматизации тестирования.  
 Стек: Python, pytest, SQL, REST API, Flask, Selenium.
 
