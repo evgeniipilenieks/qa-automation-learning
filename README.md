@@ -1,3 +1,8 @@
+![Python Tests](https://github.com/evgeniipilenieks/qa-automation-learning/actions/workflows/python-tests.yml/badge.svg)
+
+# QA Automation Learning
+
+
 # QA Automation Learning
 
 Проект для изучения автоматизации тестирования.  
